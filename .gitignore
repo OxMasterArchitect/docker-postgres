@@ -1,1 +1,18 @@
+# Environment files
 .env*
+
+# Password files
+pgpass
+
+# Backup files
+backups/*.sql
+backups/*.dump
+
+# pgAdmin data
+pgadmin_data/
+
+# PostgreSQL data
+postgres_data/
+
+# Logs
+*.log

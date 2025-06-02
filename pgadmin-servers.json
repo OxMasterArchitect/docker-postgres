@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Medusa PostgreSQL",
+      "Group": "Development",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "medusadb",
+      "Username": "superuser",
+      "SSLMode": "prefer",
+      "PassFile": "/tmp/pgpass"
+    }
+  }
+}
