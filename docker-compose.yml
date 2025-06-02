@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+
+    environment:
+      # Core database configuration
+      POSTGRES_DB: ${POSTGRES_DB:-postgres_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+
+      # Additional PostgreSQL settings
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+
+      # Performance tuning (can be overridden)
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
+
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+
+      # Custom configuration file (optional)
+      - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
+
+      # Initialization scripts (optional)
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+
+      # Backup directory (optional)
+      - ./backups:/backups
+
+    # Custom PostgreSQL configuration
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c max_worker_processes=8
+      -c max_parallel_workers_per_gather=4
+      -c max_parallel_workers=8
+      -c max_parallel_maintenance_workers=4
+      -c log_statement=all
+      -c log_min_duration_statement=1000
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+
+    # Health check
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-myapp_db}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
+
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+
+    # Network configuration
+    networks:
+      - postgres_network
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin_password}
+      PGADMIN_LISTEN_PORT: 80
+
+    ports:
+      - "${PGADMIN_PORT:-8080}:80"
+
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - postgres_network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  postgres_network:
+    driver: bridge
