@@ -3,7 +3,7 @@
 
 # Password files
 pgpass
-
+*.env
 # Backup files
 backups/*.sql
 backups/*.dump
