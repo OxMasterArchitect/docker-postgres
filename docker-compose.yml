@@ -54,8 +54,6 @@ services:
       retries: 3
       start_period: 30s
 
-
-
     # Security settings
     security_opt:
       - no-new-privileges:true
@@ -96,4 +94,5 @@ volumes:
 
 networks:
   postgres_network:
+    name: postgres_network
     driver: bridge
