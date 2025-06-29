@@ -24,7 +24,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
       # Custom configuration file (optional)
-      # - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
 
       # Initialization scripts (optional)
       - ./init-scripts:/docker-entrypoint-initdb.d:ro
