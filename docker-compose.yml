@@ -82,6 +82,7 @@ services:
 
     networks:
       - postgres_network
+      - nginx-network
 
 volumes:
   postgres_data:
@@ -93,3 +94,8 @@ networks:
   postgres_network:
     name: postgres_network
     driver: bridge
+
+  nginx-network:
+    name: nginx-network
+    driver: bridge
+    external: true
